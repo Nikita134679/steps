@@ -7,10 +7,19 @@ const App: React.FC = () => {
   const [activities, setActivities] = useState<Activity[]>([]);
 
   const handleAddActivity = (newActivity: Omit<Activity, 'id'>) => {
-    setActivities((prev) => [
-      ...prev,
-      { id: `${Date.now()}-${Math.random()}`, ...newActivity },
-    ]);
+    setActivities((prev) => {
+      const existingActivity = prev.find((act) => act.date === newActivity.date);
+      if (existingActivity) {
+        // Если дата уже существует, складываем шаги
+        return prev.map((act) =>
+          act.date === newActivity.date
+            ? { ...act, distance: act.distance + newActivity.distance }
+            : act
+        );
+      }
+      // Если дата новая, добавляем запись
+      return [...prev, { id: `${Date.now()}-${Math.random()}`, ...newActivity }];
+    });
   };
 
   const handleEditActivity = (id: string) => {
@@ -27,7 +36,9 @@ const App: React.FC = () => {
 
     setActivities((prev) =>
       prev.map((act) =>
-        act.id === id ? { ...act, date: newDate, distance: parseFloat(newDistance) } : act
+        act.id === id
+          ? { ...act, date: newDate, distance: parseFloat(newDistance) }
+          : act
       )
     );
   };
